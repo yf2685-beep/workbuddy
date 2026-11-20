@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WorkBuddy · Fashion Intelligence</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%236e56cf'/%3E%3Ctext x='7' y='29' font-family='sans-serif' font-size='30' fill='white'%3Ew%3C/text%3E%3C/svg%3E"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static',filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#"
+        ><span class="brand-icon">w.</span>WorkBuddy<span class="brand-sub"
+          >FASHION INTELLIGENCE</span
+        ></a
+      >
+      <nav>
+        <a href="#workspace">工作台</a><a href="#experiments">实验结果</a
+        ><a href="#workflow">复现流程</a
+        ><a class="github" href="https://github.com/yf2685-beep/workbuddy"
+          >GitHub ↗</a
+        >
+      </nav>
+    </header>
+    <main>
+      <section class="hero">
+        <div>
+          <div class="eyebrow">
+            <span class="dot"></span> REVIEW INSIGHTS → BETTER FIT DECISIONS
+          </div>
+          <h1>读懂评论，<br />让尺码决策<span>有据可依。</span></h1>
+          <p>
+            连接商品反馈、服装匹配模型与可追溯的评论证据。<br />一个可以动手探索、检查结果、重新训练的研究工作台。
+          </p>
+          <a href="#workspace" class="button">探索工作台 <span>↓</span></a>
+        </div>
+        <div class="hero-card">
+          <div class="card-tag">THE FEEDBACK LOOP</div>
+          <div class="mini-flow">
+            <span>01</span>
+            <div><b>历史评论</b><small>聚合尺码与穿着反馈</small></div>
+            <i>↘</i>
+          </div>
+          <div class="mini-flow">
+            <span>02</span>
+            <div>
+              <b>模型与证据</b><small>时间隔离 · 方面抽取 · 离线评估</small>
+            </div>
+            <i>↘</i>
+          </div>
+          <div class="mini-flow">
+            <span>03</span>
+            <div><b>可比较的建议</b><small>展示概率，保留原文依据</small></div>
+            <i>✓</i>
+          </div>
+          <div class="hero-note">基于 RentTheRunway 公开研究数据</div>
+        </div>
+      </section>
+      <div id="status" role="status" aria-live="polite">正在载入实验报告…</div>
+      <section class="metrics" aria-label="实验概览">
+        <article>
+          <span>清洗后评论</span><strong id="metric-rows">—</strong
+          ><small>公开数据 · 原始评论不随仓库分发</small>
+        </article>
+        <article>
+          <span>测试集 Macro-F1</span><strong id="metric-f1">—</strong
+          ><small id="metric-model">根据验证集选择模型</small>
+        </article>
+        <article>
+          <span>展示商品</span><strong id="metric-items">—</strong
+          ><small>仅使用训练期聚合反馈</small>
+        </article>
+        <article>
+          <span>评估方式</span><strong class="word">时间留出</strong
+          ><small>训练 → 验证 → 测试，按完整日期分隔</small>
+        </article>
+      </section>
+      <section id="workspace">
+        <div class="section-heading">
+          <div class="eyebrow">01 / FIT EXPLORER</div>
+          <h2>从一件商品开始。</h2>
+          <p>选择历史商品，比较不同尺码编码对应的匹配概率。</p>
+        </div>
+        <div class="workspace-grid">
+          <article class="panel">
+            <div class="panel-head">
+              <h3>尺码匹配</h3>
+              <span class="badge">PRE-PURCHASE</span>
+            </div>
+            <form id="fit-form">
+              <label
+                >商品<select
+                  id="item-select"
+                  required
+                  aria-label="商品"
+                ></select
+              ></label>
+              <div class="form-row">
+                <label
+                  >身高 / cm<input
+                    id="height"
+                    type="number"
+                    min="120"
+                    max="220"
+                    step="0.1"
+                    value="168"
+                    required /></label
+                ><label
+                  >体重 / kg<input
+                    id="weight"
+                    type="number"
+                    min="30"
+                    max="250"
+                    step="0.1"
+                    value="62"
+                    required
+                /></label>
+              </div>
+              <label
+                >体型描述（可选）<select id="body-type">
+                  <option value="unknown">不提供</option>
+                  <option value="hourglass">Hourglass</option>
+                  <option value="athletic">Athletic</option>
+                  <option value="pear">Pear</option>
+                  <option value="apple">Apple</option>
+                  <option value="petite">Petite</option>
+                  <option value="straight & narrow">Straight & narrow</option>
+                  <option value="full bust">Full bust</option>
+                </select></label
+              ><button class="button full" id="predict-btn" type="submit">
+                比较尺码候选 →
+              </button>
+            </form>
+            <p class="fine-print">
+              这里展示原始数据集的尺码编码，不等于品牌 S / M /
+              L。输入仅用于当前预测，不保存。
+            </p>
+            <div id="fit-result" aria-live="polite"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <h3>历史反馈画像</h3>
+              <span class="badge green">TRAINING HISTORY</span>
+            </div>
+            <div class="item-heading">
+              <h4 id="item-title">—</h4>
+              <p id="item-count">—</p>
+            </div>
+            <div id="fit-distribution" class="distribution"></div>
+            <div class="legend">
+              <span class="small-dot">偏小</span
+              ><span class="fit-dot">合身</span
+              ><span class="large-dot">偏大</span>
+            </div>
+            <h4 class="subheading">评论中的负面方面</h4>
+            <div id="aspect-bars"></div>
+            <div class="insight-note">
+              <b>洞察依据</b>
+              <p>
+                按商品聚合训练期反馈。方面标签来自透明的关键词规则，尚未经过人工标注集的准确率验证。
+              </p>
+              <small id="history-cutoff"></small>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section class="panel review-panel">
+        <div>
+          <div class="eyebrow">02 / REVIEW LENS</div>
+          <h2>每条洞察，回到原文。</h2>
+          <p>从英文评论中抽取尺码、版型、面料与长度，并保留对应证据。</p>
+          <form id="review-form">
+            <label for="review-text">试一条评论</label
+            ><textarea id="review-text" rows="4" maxlength="8000">
+This dress runs small. The fabric is soft. The hem is too long.</textarea
+            >
+            <div class="review-actions">
+              <select id="engine" aria-label="抽取方式">
+                <option value="rules">规则基线 · 无需 API Key</option>
+                <option value="llm" disabled>
+                  LLM · 需配置模型与 API Key
+                </option></select
+              ><button type="submit" class="button" id="extract-btn">
+                提取洞察 ↗
+              </button>
+            </div>
+          </form>
+        </div>
+        <div id="review-results" class="review-results" aria-live="polite">
+          <div class="empty">点击提取，查看带原文证据的结构化结果。</div>
+        </div>
+      </section>
+      <section id="experiments">
+        <div class="section-heading">
+          <div class="eyebrow">03 / MEASURE, DON'T GUESS</div>
+          <h2>效果写在实验里。</h2>
+          <p>
+            对比多数类、逻辑回归和 MLP。模型选择依据验证集
+            Macro-F1，测试集用于最终报告。
+          </p>
+        </div>
+        <div class="panel">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>模型</th>
+                  <th>验证 Macro-F1</th>
+                  <th>测试 Macro-F1</th>
+                  <th>测试准确率</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody id="model-table"></tbody>
+            </table>
+          </div>
+          <div id="split-summary" class="split-summary"></div>
+          <p class="fine-print">
+            类别不平衡时，准确率不能单独说明效果。预测概率未经校准；离线指标不代表线上转化率或退货率改善。
+          </p>
+        </div>
+      </section>
+      <section id="workflow">
+        <div class="section-heading">
+          <div class="eyebrow">04 / REPRODUCIBLE WORKFLOW</div>
+          <h2>从数据到演示，步骤可复现。</h2>
+        </div>
+        <div class="workflow">
+          <article>
+            <span>01</span>
+            <h3>获取与清洗</h3>
+            <p>官方数据源、单位统一、缺失标记和重复检查。</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>构建历史特征</h3>
+            <p>只使用更早日期的反馈，不读取目标评论和标签。</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>训练与评估</h3>
+            <p>固定随机种子，保留验证与测试明细。</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>报告与看板</h3>
+            <p>导出 JSON 模型、指标与聚合商品画像。</p>
+          </article>
+        </div>
+        <div class="command">
+          <span>重跑完整实验</span><code>workbuddy run</code
+          ><small>自动下载并训练，不调用付费 LLM API。</small>
+        </div>
+      </section>
+      <footer>
+        <span>WorkBuddy / Built by Yuxuan Feng</span
+        ><span>Research prototype · 原始数据来源 UCSD McAuley Lab</span>
+      </footer>
+    </main>
+    <script src="{{ url_for('static',filename='app.js') }}" defer></script>
+  </body>
+</html>
