@@ -35,6 +35,7 @@ def main():
         page.wait_for_selector(".candidate.best")
         assert page.locator("#body-type option").count() == 8
         assert page.locator("#engine option").count() == 2
+        assert page.locator(".split-summary > div").first.inner_text().startswith("训练集")
         page.add_style_tag(content="html {scroll-behavior:auto!important}")
 
         def frame(duration=1500):

@@ -221,7 +221,13 @@ async function start() {
       option.value = item.item_id;
       $("#item-select").append(option);
     }
-    for (const [name, result] of Object.entries(m.models)) {
+    for (const name of [
+      "majority",
+      "metadata_logistic",
+      "history_logistic",
+      "history_mlp",
+    ]) {
+      const result = m.models[name];
       const row = element(
         "tr",
         undefined,
@@ -236,7 +242,8 @@ async function start() {
       );
       $("#model-table").append(row);
     }
-    for (const [name, split] of Object.entries(m.splits)) {
+    for (const name of ["train", "validation", "test"]) {
+      const split = m.splits[name];
       const div = element(
         "div",
         { train: "训练集", validation: "验证集", test: "测试集" }[name] +
